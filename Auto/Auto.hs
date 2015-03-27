@@ -34,11 +34,11 @@ symA c = A [True, False] [False] (id) (\s c' -> if ((not s) && (c' == c)) then [
 
 
 leftA :: Auto a q -> Auto a (Either q r) 
-leftA = undefined
+leftA auto = A (map (Left) (states auto)) (map (Left) (initStates auto)) (either (isAccepting auto) (\_ -> False)) (either (\v c -> map (Left) (transition auto v c)) (\_ _ -> []))
 
 
 rightA :: Auto a q -> Auto a (Either p q) 
-rightA  = undefined
+rightA auto = A (map (Right) (states auto)) (map (Right) (initStates auto)) (either (\_ -> False) (isAccepting auto)) (either (\_ _ -> []) (\v c -> map (Right) (transition auto v c)))
 
 
 fromLists :: (Eq q, Eq a) => [q] -> [q] -> [q] -> [(q, a, [q])] -> Auto a q
