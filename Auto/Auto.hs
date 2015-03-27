@@ -46,7 +46,8 @@ fromLists s iS iA t = A s iS (foldl (\f v -> (\u -> (u == v) || (f u))) (\_ -> F
 
 
 toLists :: (Enum a,Bounded a) => Auto a q -> ([q], [q], [q], [(q,a,[q])])
-toLists = undefined    
+toLists auto = ((states auto), (initStates auto), (filter (isAccepting auto) (states auto)), 
+        (filter (\(v, c, neigh) -> not (null neigh)) [(v, c, (transition auto v c)) | v <- (states auto), c <- (enumFrom minBound)]))
 
 
 thenA :: Auto a q1 -> Auto a q2 -> Auto a (Either q1 q2)
