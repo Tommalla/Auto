@@ -55,4 +55,7 @@ thenA = undefined
 
 
 sumA :: Auto a q1 -> Auto a q2 -> Auto a (Either q1 q2)
-sumA = undefined                 
+sumA auto1 auto2 = A ((states leftA1) ++ (states rightA2)) ((initStates leftA1) ++ (initStates rightA2)) (either (isAccepting auto1) (isAccepting auto2)) (either (\v c -> map (Left) (transition auto1 v c)) (\v c -> map (Right) (transition auto2 v c)))
+    where
+        leftA1 = leftA auto1
+        rightA2 = rightA auto2
