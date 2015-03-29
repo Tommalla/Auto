@@ -6,6 +6,9 @@ module Auto( Auto
            ) where
 
            
+import Data.List
+           
+           
 data Auto a q = A { states      :: [q]
                   , initStates  :: [q]
                   , isAccepting :: q -> Bool
@@ -14,19 +17,15 @@ data Auto a q = A { states      :: [q]
 
                   
 accepts :: Eq q => Auto a q -> [a] -> Bool
-accepts auto word = foldl (\res v -> res || (isAccepting auto v) || (fst (dfs v word []))) False (initStates auto)
-    where
---         dfs :: Eq q => q -> [a] -> [q] -> (Bool, [q])
-        dfs u (c:wordTail) prevVis = foldl (\(tmpRes, tmpVis) w -> if tmpRes then (tmpRes, tmpVis) else (if (isAccepting auto w) then (True, tmpVis) else (if (not (elem w tmpVis)) then (dfs w wordTail (w:tmpVis)) else (tmpRes, tmpVis)))) (False, prevVis) (transition auto u c)
-        dfs _ [] prevVis = (False, prevVis)
+accepts auto word = any (isAccepting auto) (foldl (\possible c -> (nub . concat . map (\v -> transition auto v c)) possible) (initStates auto) word)
 
 
 emptyA :: Auto a ()
-emptyA = A [] [] (\s -> False) (\s c -> [])
+emptyA = A [] [] (\s -> False) (\_ _ -> [])
 
 
 epsA :: Auto a ()
-epsA = A [()] [()] (== ()) (\s c -> []) 
+epsA = A [()] [()] (== ()) (\s c -> [])
 
 
 symA :: Eq a => a -> Auto a Bool
@@ -41,17 +40,11 @@ rightA :: Auto a q -> Auto a (Either p q)
 rightA auto = A (map (Right) (states auto)) (map (Right) (initStates auto)) (either (\_ -> False) (isAccepting auto)) (either (\_ _ -> []) (\v c -> map (Right) (transition auto v c)))
 
 
-fromLists :: (Eq q, Eq a) => [q] -> [q] -> [q] -> [(q, a, [q])] -> Auto a q
-fromLists s iS iA t = A s iS (foldl (\f v -> (\u -> (u == v) || (f u))) (\_ -> False) iA) (foldl (\f (v, c, neigh) -> (\u l -> if (u == v) && (c == l) then neigh else (f u l))) (\_ _ -> []) t) 
-
-
-toLists :: (Enum a,Bounded a) => Auto a q -> ([q], [q], [q], [(q,a,[q])])
-toLists auto = ((states auto), (initStates auto), (filter (isAccepting auto) (states auto)), 
-        (filter (\(v, c, neigh) -> not (null neigh)) [(v, c, (transition auto v c)) | v <- (states auto), c <- (enumFrom minBound)]))
-
-
 thenA :: Auto a q1 -> Auto a q2 -> Auto a (Either q1 q2)
-thenA = undefined
+thenA auto1 auto2 = A ((states leftA1) ++ (states rightA2)) (initStates leftA1) (isAccepting rightA2) (either (\v c -> (transition leftA1 (Left v) c) ++ (if (isAccepting auto1 v) then (foldl (\res w -> res ++ (transition rightA2 w c)) [] (initStates rightA2)) else [])) (\v -> transition rightA2 (Right v)))
+    where
+        leftA1 = leftA auto1
+        rightA2 = rightA auto2
 
 
 sumA :: Auto a q1 -> Auto a q2 -> Auto a (Either q1 q2)
@@ -59,3 +52,12 @@ sumA auto1 auto2 = A ((states leftA1) ++ (states rightA2)) ((initStates leftA1) 
     where
         leftA1 = leftA auto1
         rightA2 = rightA auto2
+
+
+fromLists :: (Eq q, Eq a) => [q] -> [q] -> [q] -> [(q, a, [q])] -> Auto a q
+fromLists s iS iA t = A s iS (foldl (\f v -> (\u -> (u == v) || (f u))) (\_ -> False) iA) (foldl (\f (v, c, neigh) -> (\u l -> if (u == v) && (c == l) then neigh else (f u l))) (\_ _ -> []) t) 
+
+
+toLists :: (Enum a,Bounded a) => Auto a q -> ([q], [q], [q], [(q,a,[q])])
+toLists auto = ((states auto), (initStates auto), (filter (isAccepting auto) (states auto)), 
+        (filter (\(v, c, neigh) -> not (null neigh)) [(v, c, (transition auto v c)) | v <- (states auto), c <- (enumFrom minBound)]))
