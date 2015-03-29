@@ -1,18 +1,15 @@
+import System.IO
 import Text.Read
-import System.Exit
-
-
-getInt :: IO Int
-getInt = do
-    line <- getLine
-    case readMaybe line of
-        Just x -> return x
-        Nothing -> putStrLn "BAD INPUT" >> exitWith (ExitFailure 1)
 
 
 main = do
-    nStates <- getInt
+    handle <- openFile "test0.in" ReadMode
+    let hGetLine' = hGetLine handle
+    line <- hGetLine'
+    let numStates = readMaybe line :: Maybe Int
+    line <- hGetLine'
+    let initStates = readMaybe line :: Maybe [Int]
+    line <- hGetLine'
+    let acceptingStates = readMaybe line :: Maybe [Int]
     
-
-    print nStates
-    
+    return 0
