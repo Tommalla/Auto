@@ -45,7 +45,7 @@ runAuto filename = do
     let acceptingStates = readMaybe line :: Maybe [Int]
     
     input <- hGetContents handle
-    let (word:inputLines) = (reverse . lines) input
+    let (word:inputLines) = (reverse . filter (not . null) . lines) input
     let transitions = concatMaybe (map (parseTrans . words) inputLines)
     
     if ((isNothing transitions) || (isNothing numStates) || (isNothing initStates) || (isNothing acceptingStates) || (any (not . isUpper) word) || (any (< 0) ((fromJust initStates) ++ (fromJust acceptingStates))))
