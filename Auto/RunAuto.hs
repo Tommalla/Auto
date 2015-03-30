@@ -1,9 +1,12 @@
+{- Tomasz Zakrzewski, tz336079
+ - JPP 2014/2015
+ -}
+import Auto
 import Data.Char
 import Data.Maybe
 import System.Environment
 import System.IO
 import Text.Read
-import Auto
 
 
 assertNatural :: Maybe Int -> Maybe Int

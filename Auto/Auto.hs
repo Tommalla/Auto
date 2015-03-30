@@ -1,3 +1,7 @@
+{- Tomasz Zakrzewski, tz336079
+ - JPP 2014/2015
+ -}
+
 module Auto( Auto
            , accepts
            , emptyA, epsA, symA
