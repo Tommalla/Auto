@@ -18,8 +18,8 @@ readMaybeNatural = assertNatural . readMaybe
 parseTrans :: [String] -> Maybe [(Int, Char, [Int])]
 parseTrans (state:chars:rest) = if ((any (not . isUpper) chars) || (isNothing maybeState) || (any (isNothing) maybeRest)) then Nothing else (Just (map (\c -> (fromJust maybeState, c, map (fromJust) maybeRest)) chars))
     where
-        maybeState = readMaybeNatural state
-        maybeRest = map (readMaybeNatural) rest
+        maybeState = readMaybe state
+        maybeRest = map (readMaybe) rest
 parseTrans _ = Nothing
 
 
@@ -52,7 +52,7 @@ runAuto filename = do
     let (word:inputLines) = (reverse . filter (not . null) . lines) input
     let transitions = concatMaybe (map (parseTrans . words) inputLines)
     
-    if ((isNothing transitions) || (isNothing numStates) || (isNothing initStates) || (isNothing acceptingStates) || (any (not . isUpper) word) || (any (\x -> x > (fromJust numStates) || x < 1) ((fromJust initStates) ++ (fromJust acceptingStates) ++ (presentStates (fromJust transitions)))))
+    if ((isNothing transitions) || (isNothing numStates) || (isNothing initStates) || (isNothing acceptingStates) || (any (not . isUpper) word) || (any (\x -> (x > (fromJust numStates)) || (x < 1)) ((fromJust initStates) ++ (fromJust acceptingStates) ++ (presentStates (fromJust transitions)))))
        then 
             printFailure
        else do
