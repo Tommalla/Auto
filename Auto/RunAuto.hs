@@ -1,5 +1,6 @@
 import Data.Char
 import Data.Maybe
+import System.Environment
 import System.IO
 import Text.Read
 import Auto
@@ -18,9 +19,12 @@ concatMaybe l = if ((length filtered) /= (length l)) then Nothing else (Just (co
     where
         filtered = catMaybes l
 
-
-main = do
-    handle <- openFile "test1.in" ReadMode
+        
+printFailure = putStrLn "BAD INPUT" 
+        
+        
+runAuto filename = do
+    handle <- openFile filename ReadMode
     let hGetLine' = hGetLine handle
     line <- hGetLine'
     let numStates = readMaybe line :: Maybe Int
@@ -35,7 +39,15 @@ main = do
     
     if ((isNothing transitions) || (isNothing numStates) || (isNothing initStates) || (isNothing acceptingStates) || (any (not . isUpper) word)) 
        then 
-            putStrLn "BAD INPUT" 
+            printFailure
        else do
             let auto = fromLists [1.. (fromJust numStates)] (fromJust initStates) (fromJust acceptingStates) (fromJust transitions)
             print (accepts auto word)
+      
+      
+parse [filename] = runAuto filename
+parse _ = printFailure
+      
+
+main = getArgs >>= parse
+    
