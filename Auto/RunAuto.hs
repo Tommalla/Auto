@@ -27,10 +27,8 @@ parseTrans _ = Nothing
 
 
 concatMaybe :: [Maybe [a]] -> Maybe [a]
-concatMaybe l = if ((length filtered) /= (length l)) then Nothing else (Just (concat filtered))
-    where
-        filtered = catMaybes l
-        
+concatMaybe l = maybe Nothing (Just . concat) (sequence l)
+
         
 presentStates :: [(Int, Char, [Int])] -> [Int]
 presentStates = foldl (\res (s, _, neigh) -> s:(neigh ++ res)) []
